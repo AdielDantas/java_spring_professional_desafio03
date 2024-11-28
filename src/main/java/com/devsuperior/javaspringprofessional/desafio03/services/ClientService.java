@@ -3,12 +3,15 @@ package com.devsuperior.javaspringprofessional.desafio03.services;
 import com.devsuperior.javaspringprofessional.desafio03.dto.ClientDTO;
 import com.devsuperior.javaspringprofessional.desafio03.entities.Client;
 import com.devsuperior.javaspringprofessional.desafio03.repositories.ClientRepository;
+import com.devsuperior.javaspringprofessional.desafio03.services.exception.DataBaseException;
 import com.devsuperior.javaspringprofessional.desafio03.services.exception.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -48,6 +51,19 @@ public class ClientService {
         }
         catch (EntityNotFoundException e) {
             throw new ResourceNotFoundException("Recurso não localizado");
+        }
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Recurso não localizado");
+        }
+        try {
+            repository.deleteById(id);
+        }
+        catch (DataIntegrityViolationException e) {
+            throw new DataBaseException("Falha de integridade referencial");
         }
     }
 
