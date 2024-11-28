@@ -4,6 +4,7 @@ import com.devsuperior.javaspringprofessional.desafio03.dto.ClientDTO;
 import com.devsuperior.javaspringprofessional.desafio03.entities.Client;
 import com.devsuperior.javaspringprofessional.desafio03.repositories.ClientRepository;
 import com.devsuperior.javaspringprofessional.desafio03.services.exception.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,19 @@ public class ClientService {
         copyDtoToEntity(dto, client);
         client = repository.save(client);
         return new ClientDTO(client);
+    }
+
+    @Transactional
+    public ClientDTO update(Long id, ClientDTO dto) {
+        try {
+            Client client = repository.getReferenceById(id);
+            copyDtoToEntity(dto, client);
+            client = repository.save(client);
+            return new ClientDTO(client);
+        }
+        catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("Recurso não localizado");
+        }
     }
 
     private void copyDtoToEntity (ClientDTO dto, Client client) {
